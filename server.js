@@ -1,9 +1,14 @@
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+// Carrega variáveis do .env (token do Telegram) — Node 20.6+
+try { process.loadEnvFile(fileURLToPath(new URL("./.env", import.meta.url))); } catch { /* sem .env: tudo bem */ }
+
 import { getPage } from "./lib/fetcher.js";
 import { parseRanking, parseItemLog, parseDuelLog } from "./lib/parsers.js";
 import { startTracker, ensureFresh, getPresence } from "./lib/tracker.js";
+import { startBot } from "./lib/bot.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -118,4 +123,5 @@ app.get("/api/online", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`\n  Destiny Tale Lookup rodando em:  http://localhost:${PORT}\n`);
   startTracker(); // começa a rastrear presença (conexões/desconexões)
+  startBot();     // bot do Telegram (comandos + avisos)
 });

@@ -41,6 +41,23 @@ netlify deploy --prod
   npm start
   ```
 
+## Ativar o bot do Telegram (avisos)
+
+O bot é opcional, mas se você quiser os avisos (conectou/desconectou/morreu/dropou):
+
+1. **Coloque o token** no Netlify: **Site settings → Environment variables → Add**
+   - `TELEGRAM_BOT_TOKEN` = o token que o @BotFather te deu
+   - (opcional) `TELEGRAM_WEBHOOK_SECRET` = uma senha qualquer (deixa o webhook mais seguro)
+2. **Publique** (deploy).
+3. **Registre o webhook**: abra **uma vez** no navegador:
+   `https://SEU-SITE.netlify.app/api/telegram-setup`
+   Deve responder `{"telegram":{"ok":true,...}}`. Pronto — o bot está no ar 24/7.
+4. No Telegram, abra **@destinypriston_bot**, mande `/start` e `/seguir NICK`.
+
+> ⚠️ Não rode o `npm start` local com o bot ligado ao mesmo tempo que o site do Netlify —
+> o modo local "puxa" o bot pra ele. Se isso acontecer, é só reabrir a URL do passo 3
+> pra devolver o bot pro Netlify.
+
 ## Detalhes que valem saber
 
 - **Custo:** dentro do plano grátis do Netlify (a função agendada roda ~43 mil vezes/mês,
