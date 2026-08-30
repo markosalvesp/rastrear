@@ -19,20 +19,24 @@ async function notifyPresence(chats, connects, disconnects) {
     for (const c of followersOf(chats, nick)) await sendMessage(c, presenceText(nick, "disconnect", { durationSec }));
 }
 
+// Envia as mensagens; só avança o marcador se TODAS foram entregues
+// (assim uma falha de envio não "engole" o evento — tenta de novo depois).
+async function applyDiff(nick, type, diff, followers, marks) {
+  let allOk = true;
+  for (const m of diff.messages) for (const c of followers) if (!(await sendMessage(c, m))) allOk = false;
+  if (allOk) setMark(marks, nick, type, diff.newMark);
+}
+
 async function checkOne(nick, day, month, marks, chats) {
   const followers = followersOf(chats, nick);
   if (!followers.length) return;
   try {
     const log = await getPage("/logs/drops", { q: nick, day, month, perPage: 20 }).then(parseItemLog);
-    const diff = dropsDiff(nick, log.rows, getMark(marks, nick, "drops"));
-    setMark(marks, nick, "drops", diff.newMark);
-    for (const m of diff.messages) for (const c of followers) await sendMessage(c, m);
+    await applyDiff(nick, "drops", dropsDiff(nick, log.rows, getMark(marks, nick, "drops")), followers, marks);
   } catch (e) { console.error("drops", nick, e.message); }
   try {
     const rows = await getPage("/rankings/pvp-history", { q: nick, day, month, perPage: 30 }).then(parseDuelLog);
-    const diff = pvpDiff(nick, rows, getMark(marks, nick, "pvp"));
-    setMark(marks, nick, "pvp", diff.newMark);
-    for (const m of diff.messages) for (const c of followers) await sendMessage(c, m);
+    await applyDiff(nick, "pvp", pvpDiff(nick, rows, getMark(marks, nick, "pvp")), followers, marks);
   } catch (e) { console.error("pvp", nick, e.message); }
 }
 
