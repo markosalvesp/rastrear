@@ -22,6 +22,16 @@
   h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: .5px; }
   h1 span { color: var(--gold); }
   .sub { color: var(--muted); font-size: 13px; }
+  .tg-cta {
+    display: flex; align-items: center; gap: 11px; margin-top: 14px;
+    padding: 13px 16px; border-radius: 12px; text-decoration: none; color: var(--txt);
+    font-size: 13.5px; line-height: 1.45; font-size: clamp(13px, 2.4vw, 14px);
+    background: linear-gradient(180deg, #14293f, #101a26);
+    border: 1px solid #2f6db355; transition: border-color .18s, transform .18s;
+  }
+  .tg-cta:hover { border-color: #3ea0e8; transform: translateY(-1px); }
+  .tg-cta b { color: #4db3f0; }
+  .tg-cta span:first-of-type, .tg-cta > *:first-child { font-size: 20px; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 20px; }
 
   /* ---------- banner (estilo Destiny Tale) ---------- */
@@ -121,21 +131,16 @@
     <p class="masthead-tag">Rastreador</p>
   </header>
   <div class="wrap" style="padding:4px 20px 0; max-width:1080px">
-    <div class="sub">Digite o nick para ver status online, PvP, para quem morreu, drops, boss, craft e mais.</div>
+    <div class="sub">Digite o nick para ver todas as informações da conta: status online, PvP, quem matou / morreu, drops, boss, craft e mais.</div>
+    <a class="tg-cta" href="https://t.me/destinypriston_bot" target="_blank" rel="noopener">
+      📲 <span><b>Acompanhe em tempo real pelo seu celular</b> — receba aviso quando o personagem conectar, desconectar, matar, morrer ou dropar. Toque para abrir o bot no Telegram →</span>
+    </a>
   </div>
 
   <form class="searchbar" id="form">
-    <div class="field">
+    <div class="field" style="flex:1; min-width:240px">
       <label for="nick">Nick do personagem</label>
       <input id="nick" placeholder="ex: Mewku" autocomplete="off" />
-    </div>
-    <div class="field">
-      <label for="day">Dia</label>
-      <input id="day" type="number" min="1" max="31" style="width:80px" />
-    </div>
-    <div class="field">
-      <label for="month">Mês</label>
-      <input id="month" type="number" min="1" max="12" style="width:80px" />
     </div>
     <button type="submit" id="go">Buscar</button>
   </form>
@@ -166,17 +171,13 @@ const dur = (sec) => {
   return h ? `${h}h${String(m).padStart(2,"0")}m` : `${m}m`;
 };
 
-// data padrão = hoje
-const now = new Date();
-$("#day").value = now.getDate();
-$("#month").value = now.getMonth() + 1;
-
 $("#form").addEventListener("submit", (e) => { e.preventDefault(); run(); });
 
 async function run() {
   const nick = $("#nick").value.trim();
   if (!nick) return;
-  const day = $("#day").value, month = $("#month").value;
+  const now = new Date(); // sempre hoje (fuso do navegador)
+  const day = now.getDate(), month = now.getMonth() + 1;
   setStatus("Buscando " + nick + "… (pode levar alguns segundos)");
   $("#go").disabled = true;
   $("#result").innerHTML = "";
