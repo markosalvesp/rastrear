@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Destiny Tale — Consulta de Jogador</title>
+<style>
+  :root {
+    --bg: #0b0d12; --panel: #151a23; --panel2: #1c232f; --line: #2a3341;
+    --txt: #e6e9ef; --muted: #8b95a7; --gold: #e6c97a; --green: #34d399;
+    --red: #f0776a; --blue: #6aa8f0; --accent: #7c5cff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--txt);
+    font-family: "Segoe UI", system-ui, Arial, sans-serif; line-height: 1.45;
+  }
+  header {
+    padding: 22px 20px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #141925, #0b0d12);
+  }
+  h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: .5px; }
+  h1 span { color: var(--gold); }
+  .sub { color: var(--muted); font-size: 13px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 20px; }
+
+  /* ---------- banner (estilo Destiny Tale) ---------- */
+  .masthead {
+    position: relative; text-align: center; overflow: hidden;
+    max-width: 1080px; margin: 22px auto 4px; padding: 2.4rem 1.5rem 2.1rem;
+    border-radius: 6px;
+    background:
+      radial-gradient(ellipse 70% 100% at 50% 10%, rgba(230,172,87,0.16), transparent 70%),
+      linear-gradient(180deg, #0d1520 0%, #070b10 100%);
+    border: 1px solid rgba(201,163,95,0.24);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.35);
+  }
+  .masthead::before, .masthead::after {
+    content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+    width: min(560px, 86%); height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,163,95,0.45) 18%, #cda862 50%, rgba(201,163,95,0.45) 82%, transparent);
+  }
+  .masthead::before { top: 0; }
+  .masthead::after { bottom: 0; }
+  .masthead-logo {
+    height: clamp(52px, 9vw, 88px); width: auto; object-fit: contain; display: inline-block;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.55));
+  }
+  .masthead-tag {
+    margin: 0.9rem 0 0; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #6b7c92; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+  }
+  .masthead-tag::before, .masthead-tag::after { content: "\2756"; color: #cda862; font-size: 0.85em; }
+  .searchbar {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: end;
+    max-width: 1080px; margin: 16px auto 0; padding: 0 20px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  input, select {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--txt);
+    padding: 10px 12px; border-radius: 8px; font-size: 14px; outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  #nick { min-width: 240px; }
+  button {
+    background: var(--accent); color: #fff; border: 0; padding: 11px 20px;
+    border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  .status { color: var(--muted); font-size: 13px; margin: 14px 0; min-height: 18px; }
+  .status.err { color: var(--red); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .hero { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; flex-wrap: wrap; }
+  .hero .name { font-size: 24px; font-weight: 700; color: var(--gold); }
+  .hero .meta { color: var(--muted); font-size: 14px; }
+  .stat { text-align: center; }
+  .stat .v { font-size: 26px; font-weight: 700; }
+  .stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .v.green { color: var(--green); } .v.red { color: var(--red); } .v.gold { color: var(--gold); }
+  section { margin-top: 26px; }
+  section > h2 { font-size: 15px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  section > h2 .count { color: var(--muted); font-weight: 400; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+  tr:hover td { background: #ffffff06; }
+  .tag { font-size: 11px; color: var(--muted); }
+  .empty { color: var(--muted); font-size: 13px; padding: 8px 2px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; border:1px solid var(--line); }
+  .pill.loss { color: var(--red); border-color:#f0776a44; background:#f0776a12; }
+  .pill.win { color: var(--green); border-color:#34d39944; background:#34d39912; }
+  .pill.on { color: var(--green); border-color:#34d39955; background:#34d39916; }
+  .pill.off { color: var(--muted); border-color:var(--line); background:#ffffff08; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .dot.on { background:#22c55e; box-shadow:0 0 6px #22c55e88; }
+  .dot.off { background:#6b7280; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .favs-head { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing:.5px; margin-bottom: 8px; }
+  .favs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 20px;
+    font-size: 13px; cursor: pointer; user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip .x { color: var(--muted); font-size: 15px; line-height: 1; padding: 0 2px; }
+  .chip .x:hover { color: var(--red); }
+  .star { cursor: pointer; font-size: 20px; color: var(--muted); user-select: none; }
+  .star.saved { color: var(--gold); }
+  .scroll { overflow-x: auto; }
+  .mono { font-variant-numeric: tabular-nums; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; padding: 30px 20px; }
+</style>
+</head>
+<body>
+  <header class="masthead">
+    <img class="masthead-logo" src="/destiny-logo.webp" alt="Destiny Tale" />
+    <p class="masthead-tag">Rastreador</p>
+  </header>
+  <div class="wrap" style="padding:4px 20px 0; max-width:1080px">
+    <div class="sub">Digite o nick para ver status online, PvP, para quem morreu, drops, boss, craft e mais.</div>
+  </div>
+
+  <form class="searchbar" id="form">
+    <div class="field">
+      <label for="nick">Nick do personagem</label>
+      <input id="nick" placeholder="ex: Mewku" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label for="day">Dia</label>
+      <input id="day" type="number" min="1" max="31" style="width:80px" />
+    </div>
+    <div class="field">
+      <label for="month">Mês</label>
+      <input id="month" type="number" min="1" max="12" style="width:80px" />
+    </div>
+    <button type="submit" id="go">Buscar</button>
+  </form>
+
+  <div class="wrap" id="favsWrap" style="padding-top:0; display:none">
+    <div class="favs-head">★ Meus bonecos <span class="tag" id="favsMeta"></span></div>
+    <div class="favs" id="favs"></div>
+  </div>
+
+  <div class="wrap">
+    <div class="status" id="status"></div>
+    <div id="result"></div>
+  </div>
+
+  <footer>
+    Dados de destinytale.com.br · seus bonecos ficam salvos neste navegador
+  </footer>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[m]));
+const hhmm = (ms) => ms ? new Date(ms).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—";
+const dmHhmm = (ms) => ms ? new Date(ms).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+const dur = (sec) => {
+  if (sec == null) return "";
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
+  return h ? `${h}h${String(m).padStart(2,"0")}m` : `${m}m`;
+};
+
+// data padrão = hoje
+const now = new Date();
+$("#day").value = now.getDate();
+$("#month").value = now.getMonth() + 1;
+
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); run(); });
+
+async function run() {
+  const nick = $("#nick").value.trim();
+  if (!nick) return;
+  const day = $("#day").value, month = $("#month").value;
+  setStatus("Buscando " + nick + "… (pode levar alguns segundos)");
+  $("#go").disabled = true;
+  $("#result").innerHTML = "";
+  try {
+    const r = await fetch(`/api/player?nick=${encodeURIComponent(nick)}&day=${day}&month=${month}`);
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Falha na busca");
+    render(data);
+    setStatus("");
+  } catch (err) {
+    setStatus(err.message, true);
+  } finally {
+    $("#go").disabled = false;
+  }
+}
+
+function setStatus(msg, isErr) {
+  const s = $("#status"); s.textContent = msg || ""; s.className = "status" + (isErr ? " err" : "");
+}
+
+// ---- "Meus bonecos" (salvos no navegador, sem login) ----
+const FAV_KEY = "dt_favs";
+const loadFavs = () => { try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; } };
+const saveFavs = (a) => { try { localStorage.setItem(FAV_KEY, JSON.stringify(a)); } catch {} };
+const isFav = (nick) => loadFavs().some((n) => n.toLowerCase() === nick.toLowerCase());
+function addFav(nick) { const a = loadFavs(); if (!a.some((n) => n.toLowerCase() === nick.toLowerCase())) { a.push(nick); saveFavs(a); } renderFavs(); }
+function removeFav(nick) { saveFavs(loadFavs().filter((n) => n.toLowerCase() !== nick.toLowerCase())); renderFavs(); }
+function toggleFav(nick) { isFav(nick) ? removeFav(nick) : addFav(nick); }
+
+function favStar(nick) {
+  const on = isFav(nick);
+  const s = el("span", "star" + (on ? " saved" : ""), on ? "★" : "☆");
+  s.title = "Salvar/remover dos meus bonecos";
+  s.style.marginLeft = "auto";
+  s.onclick = () => { toggleFav(nick); const now = isFav(nick); s.classList.toggle("saved", now); s.textContent = now ? "★" : "☆"; };
+  return s;
+}
+
+function renderFavs() {
+  const favs = loadFavs();
+  $("#favsWrap").style.display = favs.length ? "block" : "none";
+  const box = $("#favs"); box.innerHTML = "";
+  favs.forEach((nick) => {
+    const chip = el("div", "chip");
+    chip.dataset.nick = nick;
+    chip.innerHTML = `<span class="dot off" data-dot></span><span data-name>${esc(nick)}</span><span class="x" title="remover">×</span>`;
+    chip.querySelector("[data-name]").onclick = () => { $("#nick").value = nick; run(); };
+    chip.querySelector("[data-dot]").onclick = () => { $("#nick").value = nick; run(); };
+    chip.querySelector(".x").onclick = (e) => { e.stopPropagation(); removeFav(nick); };
+    box.appendChild(chip);
+  });
+  refreshFavStatus();
+}
+
+async function refreshFavStatus() {
+  const favs = loadFavs(); if (!favs.length) return;
+  try {
+    const r = await fetch(`/api/online?nicks=${encodeURIComponent(favs.join(","))}`);
+    const d = await r.json();
+    $("#favsMeta").textContent = d.liveCount ? `· ${d.liveCount} online no servidor` : "";
+    document.querySelectorAll("#favs .chip").forEach((chip) => {
+      const st = d.players && d.players[chip.dataset.nick];
+      const dot = chip.querySelector("[data-dot]");
+      if (st && st.onlineNow) { dot.className = "dot on"; chip.title = "Online agora"; }
+      else { dot.className = "dot off"; chip.title = st && st.lastDisconnect ? "Visto " + dmHhmm(st.lastDisconnect) : "Offline"; }
+    });
+  } catch {}
+}
+
+renderFavs();
+setInterval(refreshFavStatus, 60000); // atualiza status dos bonecos a cada 60s
+
+function render(d) {
+  const root = $("#result"); root.innerHTML = "";
+  const p = d.pvp.self;
+
+  // --- Cabeçalho do jogador ---
+  const hero = el("div", "card");
+  if (p) {
+    const kdr = p.deaths ? (p.kills / p.deaths).toFixed(2) : (p.kills || 0).toFixed(2);
+    hero.innerHTML = `
+      <div class="hero">
+        <div>
+          <div class="name">${esc(p.nick)}</div>
+          <div class="meta">${esc(p.class || "—")} · Lv ${p.level ?? "—"} ${p.clan ? "· clã " + esc(p.clan) : ""} ${p.rank ? "· #"+p.rank+" no ranking PvP" : ""}</div>
+        </div>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div class="stat"><div class="v green mono">${p.kills ?? "—"}</div><div class="l">Abates</div></div>
+        <div class="stat"><div class="v red mono">${p.deaths ?? "—"}</div><div class="l">Mortes</div></div>
+        <div class="stat"><div class="v gold mono">${kdr}</div><div class="l">K/D</div></div>
+        <div class="stat"><div class="v mono">${p.level ?? "—"}</div><div class="l">Level</div></div>
+      </div>`;
+  } else {
+    hero.innerHTML = `<div class="empty">Nick "<b>${esc(d.nick)}</b>" não encontrado no ranking PvP (pode não ter kills/deaths registrados). As buscas de logs abaixo ainda podem trazer resultados.</div>`;
+  }
+  const heroLine = hero.querySelector(".hero");
+  (heroLine || hero).appendChild(favStar(d.nick));
+  root.appendChild(hero);
+
+  // --- Status online + histórico de conexão ---
+  if (d.presence) root.appendChild(presenceSection(d.presence));
+
+  const dateStr = `${String(d.date.day).padStart(2,"0")}/${String(d.date.month).padStart(2,"0")}`;
+
+  // --- Para quem morreu (duelos perdidos) ---
+  root.appendChild(duelSection("💀 Para quem morreu", d.duels.deaths, "loser", `Duelos perdidos em ${dateStr}`));
+  // --- Quem matou (duelos vencidos) ---
+  root.appendChild(duelSection("⚔️ Quem ele matou", d.duels.kills, "winner", `Duelos vencidos em ${dateStr}`));
+
+  // --- Logs de item ---
+  root.appendChild(itemSection("🎁 Drops", d.drops, dateStr));
+  root.appendChild(itemSection("🎰 Boss / Roleta", d.boss, dateStr));
+  root.appendChild(itemSection("🔨 Craft", d.craft, dateStr));
+  root.appendChild(itemSection("⏳ Aging", d.aging, dateStr));
+  root.appendChild(itemSection("🧪 Mix", d.mix, dateStr));
+
+  if (d.errors) {
+    const e = el("div", "status err", "Algumas seções falharam: " + esc(JSON.stringify(d.errors)));
+    root.appendChild(e);
+  }
+}
+
+function presenceSection(pr) {
+  const s = el("section");
+  const online = pr.onlineNow;
+  const badge = online
+    ? `<span class="pill on"><span class="dot on"></span>Online agora</span>`
+    : `<span class="pill off"><span class="dot off"></span>Offline</span>`;
+
+  let line = "";
+  if (online) {
+    line = pr.sinceExact
+      ? `Conectado desde <b>${hhmm(pr.since)}</b>`
+      : `Já estava online quando começamos a monitorar (${hhmm(pr.trackingSince)})`;
+  } else if (pr.lastDisconnect) {
+    line = `Visto pela última vez às <b>${dmHhmm(pr.lastDisconnect)}</b>`;
+  } else {
+    line = `Sem registro de conexão ainda (offline desde que começamos a monitorar)`;
+  }
+
+  s.appendChild(el("h2", null, `🟢 Status <span class="count">${pr.liveCount ?? "?"} online no servidor</span>`));
+  const card = el("div", "card");
+  card.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${badge}<span>${line}</span></div>`;
+
+  // histórico de sessões (conectou / desconectou / duração)
+  const done = (pr.sessions || []).filter((x) => x.disconnectedAt);
+  if (done.length) {
+    let html = `<table style="margin-top:12px"><thead><tr><th>Conectou</th><th>Desconectou</th><th>Duração</th></tr></thead><tbody>`;
+    for (const x of done) {
+      html += `<tr>
+        <td class="mono">${dmHhmm(x.connectedAt)} ${x.sinceExact === false ? '<span class="tag">(ou antes)</span>' : ""}</td>
+        <td class="mono">${dmHhmm(x.disconnectedAt)}</td>
+        <td class="mono">${dur(x.durationSec)}</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+    const wrap = el("div", "scroll"); wrap.innerHTML = html; card.appendChild(wrap);
+  }
+  card.appendChild(el("div", "note",
+    `Conexões/desconexões são registradas pelo seu app a partir de ${dmHhmm(pr.trackingSince)} (o site não guarda esse histórico). Deixe o app rodando para acumular o histórico.`));
+  s.appendChild(card);
+  return s;
+}
+
+function duelSection(title, rows, myRole, subtitle) {
+  const s = el("section");
+  s.appendChild(el("h2", null, `${title} <span class="count">${rows.length} · ${esc(subtitle)}</span>`));
+  if (!rows.length) { s.appendChild(el("div","empty","Nenhum duelo nesse dia.")); return s; }
+  const oppKey = myRole === "loser" ? "winner" : "loser";
+  const oppClsKey = myRole === "loser" ? "winnerClass" : "loserClass";
+  const label = myRole === "loser" ? "Morreu para" : "Derrotou";
+  const wrap = el("div", "scroll card");
+  let html = `<table><thead><tr><th>${label}</th><th>Classe</th><th>Hora</th><th>Resultado</th></tr></thead><tbody>`;
+  for (const d of rows) {
+    const pill = myRole === "loser" ? '<span class="pill loss">derrota</span>' : '<span class="pill win">vitória</span>';
+    html += `<tr>
+      <td><b>${esc(d[oppKey])}</b></td>
+      <td class="tag">${esc(d[oppClsKey] || "—")}</td>
+      <td class="mono">${esc(d.time || "—")} <span class="tag">${esc(d.ago||"")}</span></td>
+      <td>${pill}</td>
+    </tr>`;
+  }
+  html += "</tbody></table>";
+  wrap.innerHTML = html; s.appendChild(wrap); return s;
+}
+
+function itemSection(title, log, dateStr) {
+  const rows = (log && log.rows) || [];
+  const s = el("section");
+  s.appendChild(el("h2", null, `${title} <span class="count">${rows.length} · ${esc(dateStr)}</span>`));
+  if (!rows.length) { s.appendChild(el("div","empty","Nada registrado nesse dia.")); return s; }
+  // colunas dinâmicas conforme o tipo de log
+  const has = (k) => rows.some((r) => r[k] != null && r[k] !== "");
+  const cols = [];
+  if (has("nick")) cols.push(["nick","Personagem"]);
+  if (has("item")) cols.push(["item","Item"]);
+  if (has("roll")) cols.push(["roll","Roleta"]);
+  if (has("map"))  cols.push(["map","Origem"]);
+  if (has("outcome")) cols.push(["outcome","Resultado"]);
+  if (has("time")) cols.push(["time","Hora"]);
+  const wrap = el("div", "scroll card");
+  let html = "<table><thead><tr>" + cols.map(c=>`<th>${c[1]}</th>`).join("") + "</tr></thead><tbody>";
+  for (const r of rows) {
+    html += "<tr>" + cols.map(([k]) => {
+      if (k === "nick") return `<td><b>${esc(r.nick)}</b> <span class="tag">${esc(r.class||"")}</span></td>`;
+      if (k === "time") return `<td class="mono">${esc(r.time||"")} <span class="tag">${esc(r.ago||"")}</span></td>`;
+      if (k === "item") return `<td class="gold" style="color:var(--gold)">${esc(r.item||"")}</td>`;
+      return `<td>${esc(r[k]||"")}</td>`;
+    }).join("") + "</tr>";
+  }
+  html += "</tbody></table>";
+  wrap.innerHTML = html; s.appendChild(wrap); return s;
+}
+</script>
+</body>
+</html>
