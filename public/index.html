@@ -176,13 +176,11 @@ $("#form").addEventListener("submit", (e) => { e.preventDefault(); run(); });
 async function run() {
   const nick = $("#nick").value.trim();
   if (!nick) return;
-  const now = new Date(); // sempre hoje (fuso do navegador)
-  const day = now.getDate(), month = now.getMonth() + 1;
   setStatus("Buscando " + nick + "… (pode levar alguns segundos)");
   $("#go").disabled = true;
   $("#result").innerHTML = "";
   try {
-    const r = await fetch(`/api/player?nick=${encodeURIComponent(nick)}&day=${day}&month=${month}`);
+    const r = await fetch(`/api/player?nick=${encodeURIComponent(nick)}`);
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || "Falha na busca");
     render(data);

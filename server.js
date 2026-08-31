@@ -18,9 +18,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const norm = (s) => String(s || "").trim().toLowerCase();
 
+import { brToday } from "./lib/brdate.js";
 function todayDayMonth() {
-  const d = new Date();
-  return { day: d.getDate(), month: d.getMonth() + 1 };
+  return brToday(); // fuso do jogo (Brasília)
 }
 
 // Ranking cru (para navegar): /api/ranking?type=pvp&q=&page=1&perPage=25

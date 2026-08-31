@@ -3,6 +3,7 @@
 import { getPage } from "../../lib/fetcher.js";
 import { parseRanking, parseItemLog, parseDuelLog } from "../../lib/parsers.js";
 import { loadState, getPresenceFrom } from "../../lib/presence-store.js";
+import { brToday } from "../../lib/brdate.js";
 
 const norm = (s) => String(s || "").trim().toLowerCase();
 
@@ -11,9 +12,9 @@ export default async (req) => {
   const nick = (url.searchParams.get("nick") || "").trim();
   if (!nick) return Response.json({ error: "Informe o nick." }, { status: 400 });
 
-  const d = new Date();
-  const day = url.searchParams.get("day") || d.getDate();
-  const month = url.searchParams.get("month") || d.getMonth() + 1;
+  const t = brToday(); // fuso do jogo (Brasília)
+  const day = url.searchParams.get("day") || t.day;
+  const month = url.searchParams.get("month") || t.month;
   const nn = norm(nick);
 
   const tasks = {
