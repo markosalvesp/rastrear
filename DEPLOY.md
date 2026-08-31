@@ -58,6 +58,20 @@ O bot é opcional, mas se você quiser os avisos (conectou/desconectou/morreu/dr
 > o modo local "puxa" o bot pra ele. Se isso acontecer, é só reabrir a URL do passo 3
 > pra devolver o bot pro Netlify.
 
+## Deixar os avisos mais consistentes (cron grátis)
+
+O agendador do Netlify é "melhor esforço" (às vezes pula um minuto). Pra ter **1 min certinho**,
+um cron externo grátis cutuca o app. Tem uma trava anti-duplicação, então os dois convivem
+(um cobre o outro).
+
+1. No Netlify → **Environment variables** → adicione `CRON_SECRET` = uma senha aleatória
+   (ex: a que o app gerou pra você). Faça um deploy pra pegar a variável.
+2. Crie conta grátis em **cron-job.org**.
+3. **Create cronjob**:
+   - URL: `https://SEU-SITE.netlify.app/api/tick?key=SEU_CRON_SECRET`
+   - Schedule: **Every 1 minute** (`* * * * *`)
+   - Salvar. Pronto — roda todo minuto certinho.
+
 ## Detalhes que valem saber
 
 - **Custo:** dentro do plano grátis do Netlify (a função agendada roda ~43 mil vezes/mês,

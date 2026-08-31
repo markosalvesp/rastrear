@@ -1,18 +1,9 @@
-// Função AGENDADA (a cada 1 min): rastreia presença 24/7 e avisa conexões/desconexões.
-// (A varredura de drops/mortes fica na função events.mjs, pra não competir por tempo.)
-import { pollOnce } from "../../lib/presence-store.js";
-import { hasToken } from "../../lib/telegram.js";
-import { loadChats } from "../../lib/subs-store.js";
-import { notifyPresence } from "../../lib/notify-events.js";
+// Agendador interno do Netlify (a cada 1 min) — chama o tick (com trava anti-duplicação).
+import { runTick } from "../../lib/tick.js";
 
 export default async () => {
-  const { liveCount, connects, disconnects } = await pollOnce();
-  if (hasToken() && (connects.length || disconnects.length)) {
-    try {
-      await notifyPresence(await loadChats(), connects, disconnects);
-    } catch (e) { console.error("avisos de presença:", e.message); }
-  }
-  return new Response(`ok: ${liveCount} online`);
+  const r = await runTick();
+  return new Response(r.skipped ? "skip" : `ok: ${r.liveCount} online`);
 };
 
 export const config = { schedule: "* * * * *" };
