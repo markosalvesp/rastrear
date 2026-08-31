@@ -1,6 +1,5 @@
 // Diagnóstico. ?k=<TELEGRAM_BOT_TOKEN>. ?del=<chatId> remove um chat (limpeza de teste).
-import { getStore } from "@netlify/blobs";
-import { loadChats, updateChats } from "../../lib/subs-store.js";
+import { loadChats, deleteChat } from "../../lib/subs-store.js";
 
 export default async (req) => {
   const url = new URL(req.url);
@@ -9,9 +8,7 @@ export default async (req) => {
   }
 
   const del = url.searchParams.get("del");
-  if (del) {
-    await updateChats((s) => { delete s.chats[del]; return true; });
-  }
+  if (del) await deleteChat(del);
 
   const data = await loadChats();
   const chats = data?.chats || {};
