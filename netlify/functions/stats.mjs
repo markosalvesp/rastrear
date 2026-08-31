@@ -3,7 +3,8 @@ import { loadChats } from "../../lib/subs-store.js";
 import { loadState } from "../../lib/presence-store.js";
 
 export default async (req) => {
-  if (new URL(req.url).searchParams.get("k") !== process.env.TELEGRAM_BOT_TOKEN) {
+  const k = new URL(req.url).searchParams.get("k");
+  if (k !== process.env.CRON_SECRET && k !== process.env.TELEGRAM_BOT_TOKEN) {
     return new Response("forbidden", { status: 403 });
   }
   const { chats } = await loadChats();
