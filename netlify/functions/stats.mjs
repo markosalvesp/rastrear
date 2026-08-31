@@ -1,5 +1,5 @@
 // Estatísticas SÓ LEITURA (não altera nada). ?k=<TELEGRAM_BOT_TOKEN>. Rota: /api/stats
-import { loadChat, loadChats } from "../../lib/subs-store.js";
+import { loadChat, loadChats, deleteChat } from "../../lib/subs-store.js";
 import { loadState } from "../../lib/presence-store.js";
 
 export default async (req) => {
@@ -7,6 +7,8 @@ export default async (req) => {
   if (k !== process.env.CRON_SECRET && k !== process.env.TELEGRAM_BOT_TOKEN) {
     return new Response("forbidden", { status: 403 });
   }
+  const del = new URL(req.url).searchParams.get("del");
+  if (del) { await deleteChat(del); return Response.json({ deleted: del }); }
   // checagem por chat específico com leitura forte (sem cache eventual)
   const chatId = new URL(req.url).searchParams.get("chat");
   if (chatId) {
