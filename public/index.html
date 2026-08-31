@@ -122,6 +122,21 @@
   .star.saved { color: var(--gold); }
   .scroll { overflow-x: auto; }
   .mono { font-variant-numeric: tabular-nums; }
+  /* ---------- tutorial ---------- */
+  .tut { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-top: 10px; }
+  .tut-title { margin: 0 0 4px; font-size: 18px; }
+  .tut-sub { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+  .tut-steps { margin: 0 0 8px; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 14.5px; line-height: 1.5; }
+  .tut-steps li::marker { color: var(--gold); font-weight: 700; }
+  .tut-ok { color: var(--green); font-size: 13.5px; }
+  .tut code { background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--gold); }
+  .tg-btn { display: inline-block; margin: 4px 0; padding: 8px 14px; border-radius: 8px; background: #229ed9; color: #fff !important; text-decoration: none; font-weight: 600; font-size: 13.5px; }
+  .tg-btn:hover { background: #1c8cc0; }
+  .tg-btn-big { display: block; text-align: center; margin-top: 18px; padding: 13px; font-size: 15px; }
+  .tut-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 18px; }
+  .tut-h { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .tut-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px; line-height: 1.5; }
+  .tut-list li::marker { color: var(--accent); }
   footer { color: var(--muted); font-size: 12px; text-align: center; padding: 30px 20px; }
 </style>
 </head>
@@ -153,6 +168,46 @@
   <div class="wrap">
     <div class="status" id="status"></div>
     <div id="result"></div>
+  </div>
+
+  <div class="wrap">
+    <section class="tut">
+      <h2 class="tut-title">📖 Como usar o bot no Telegram</h2>
+      <p class="tut-sub">Deixe o personagem AFK e receba no celular quando ele <b>morrer</b>, <b>cair</b> ou <b>dropar</b>.</p>
+
+      <ol class="tut-steps">
+        <li><b>Abra o bot</b> no Telegram:
+          <a class="tg-btn" href="https://t.me/destinypriston_bot" target="_blank" rel="noopener">🤖 @destinypriston_bot</a>
+        </li>
+        <li><b>Aperte START</b> (ou mande <code>/start</code>).</li>
+        <li><b>Mande</b> <code>/seguir SeuNick</code> — ex: <code>/seguir Drunkzera</code>.<br>
+          <span class="tut-ok">✅ Pronto! Já entra no modo 🛡️ AFK e te avisa quando morrer, cair ou dropar.</span>
+        </li>
+      </ol>
+
+      <div class="tut-cols">
+        <div>
+          <div class="tut-h">🎛️ Modos (por boneco)</div>
+          <ul class="tut-list">
+            <li><code>/modo NICK afk</code> 🛡️ — morte, queda e drop <i>(padrão)</i></li>
+            <li><code>/modo NICK tudo</code> 📢 — tudo (inclui kills)</li>
+            <li><code>/modo NICK pvp</code> ⚔️ — kills e mortes</li>
+            <li><code>/modo NICK drops</code> 🎁 — só drops</li>
+          </ul>
+        </div>
+        <div>
+          <div class="tut-h">⚙️ Outros comandos</div>
+          <ul class="tut-list">
+            <li><code>/lista</code> — ver seus bonecos e modos</li>
+            <li><code>/status NICK</code> — checar agora (online?)</li>
+            <li><code>/mutar NICK kills</code> — desligar um tipo</li>
+            <li><code>/parar NICK</code> — parar de acompanhar</li>
+          </ul>
+        </div>
+      </div>
+
+      <a class="tg-btn tg-btn-big" href="https://t.me/destinypriston_bot" target="_blank" rel="noopener">📲 Abrir o bot e começar →</a>
+    </section>
   </div>
 
   <footer>
