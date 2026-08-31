@@ -1,6 +1,6 @@
 // Estatísticas SÓ LEITURA (não altera nada). ?k=<TELEGRAM_BOT_TOKEN>. Rota: /api/stats
 import { getStore } from "@netlify/blobs";
-import { loadChats } from "../../lib/subs-store.js";
+import { loadChats, updateChat } from "../../lib/subs-store.js";
 import { loadState } from "../../lib/presence-store.js";
 
 export default async (req) => {
@@ -8,6 +8,15 @@ export default async (req) => {
   if (k !== process.env.CRON_SECRET && k !== process.env.TELEGRAM_BOT_TOKEN) {
     return new Response("forbidden", { status: 403 });
   }
+  // teste de ESCRITA isolado: grava via updateChat e relê na hora
+  const tw = new URL(req.url).searchParams.get("testwrite");
+  if (tw) {
+    let writeErr = null;
+    try { await updateChat(tw, (c) => { c.nicks = ["TESTE"]; }); } catch (e) { writeErr = e.message; }
+    const back = await getStore("subs").get("chat:" + tw, { type: "json" }).catch((e) => ({ err: e.message }));
+    return Response.json({ testwrite: tw, writeErr, leuDeVolta: back });
+  }
+
   // checagem por chat específico (get é consistente na hora, diferente do list)
   const chatId = new URL(req.url).searchParams.get("chat");
   if (chatId) {
