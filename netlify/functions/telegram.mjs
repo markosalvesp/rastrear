@@ -1,7 +1,7 @@
 // Webhook do Telegram (Netlify). Recebe os comandos e responde. Rota: /api/telegram
 import { sendMessage } from "../../lib/telegram.js";
 import {
-  loadChats, updateChat, follow, unfollow, listFor, setMode, toggleType, eventsFor, toggleBoss,
+  loadChat, updateChat, follow, unfollow, listFor, setMode, toggleType, eventsFor, toggleBoss,
 } from "../../lib/subs-store.js";
 import { loadState, getPresenceFrom } from "../../lib/presence-store.js";
 import { buildReply } from "../../lib/bot-commands.js";
@@ -10,7 +10,11 @@ import { buildReply } from "../../lib/bot-commands.js";
 const store = {
   follow: (c, n) => updateChat(c, (chat) => follow(chat, n)),
   unfollow: (c, n) => updateChat(c, (chat) => unfollow(chat, n)),
-  listWithModes: async (c) => { const s = await loadChats(); return listFor(s, c).map((n) => ({ nick: n, events: eventsFor(s, c, n) })); },
+  listWithModes: async (c) => {
+    const id = String(c);
+    const s = { chats: { [id]: (await loadChat(id)) || { nicks: [] } } };
+    return listFor(s, id).map((n) => ({ nick: n, events: eventsFor(s, id, n) }));
+  },
   setMode: (c, n, p) => updateChat(c, (chat) => setMode(chat, n, p)),
   toggleType: (c, n, t, on) => updateChat(c, (chat) => toggleType(chat, n, t, on)),
   toggleBoss: (c) => updateChat(c, (chat) => toggleBoss(chat)),
@@ -26,11 +30,24 @@ export default async (req) => {
   try { update = await req.json(); } catch { return new Response("ok"); }
   const msg = update.message;
   if (msg && msg.text) {
+    let reply;
     try {
       // registra o chat (recebe avisos de boss por padrão) — cria a chave se não existir
       await updateChat(msg.chat.id, () => {});
-      await sendMessage(msg.chat.id, await buildReply(msg.text, msg.chat.id, store));
-    } catch (e) { console.error("telegram webhook:", e.message); }
+      reply = await buildReply(msg.text, msg.chat.id, store);
+    } catch (e) {
+      console.error("telegram state:", e);
+      // O Telegram tentará entregar o update novamente; não fingimos sucesso
+      // quando o comando não foi persistido.
+      return new Response("temporary error", { status: 503 });
+    }
+    try {
+      await sendMessage(msg.chat.id, reply);
+    } catch (e) {
+      // O comando já foi persistido. Pedir retry aqui poderia aplicar comandos
+      // não idempotentes (como /boss) uma segunda vez.
+      console.error("telegram send:", e);
+    }
   }
   return new Response("ok");
 };
