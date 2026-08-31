@@ -1,7 +1,7 @@
 // Webhook do Telegram (Netlify). Recebe os comandos e responde. Rota: /api/telegram
 import { sendMessage } from "../../lib/telegram.js";
 import {
-  loadChats, saveChats, follow, unfollow, listFor, setMode, toggleType, eventsFor,
+  loadChats, saveChats, follow, unfollow, listFor, setMode, toggleType, eventsFor, toggleBoss,
 } from "../../lib/subs-store.js";
 import { loadState, getPresenceFrom } from "../../lib/presence-store.js";
 import { buildReply } from "../../lib/bot-commands.js";
@@ -13,6 +13,7 @@ const store = {
   listWithModes: async (c) => { const s = await loadChats(); return listFor(s, c).map((n) => ({ nick: n, events: eventsFor(s, c, n) })); },
   setMode: async (c, n, p) => { const s = await loadChats(); const r = setMode(s, c, n, p); if (r) await saveChats(s); return r; },
   toggleType: async (c, n, t, on) => { const s = await loadChats(); const r = toggleType(s, c, n, t, on); if (r) await saveChats(s); return r; },
+  toggleBoss: async (c) => { const s = await loadChats(); const r = toggleBoss(s, c); await saveChats(s); return r; },
   presence: async (n) => getPresenceFrom(await loadState(), n),
 };
 
