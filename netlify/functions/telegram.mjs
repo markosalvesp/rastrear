@@ -1,7 +1,7 @@
 // Webhook do Telegram (Netlify). Recebe os comandos e responde. Rota: /api/telegram
 import { sendMessage } from "../../lib/telegram.js";
 import {
-  loadChats, saveChats, follow, unfollow, listFor, setMode, toggleType, eventsFor, toggleBoss,
+  loadChats, saveChats, follow, unfollow, listFor, setMode, toggleType, eventsFor, toggleBoss, touchChat,
 } from "../../lib/subs-store.js";
 import { loadState, getPresenceFrom } from "../../lib/presence-store.js";
 import { buildReply } from "../../lib/bot-commands.js";
@@ -27,6 +27,9 @@ export default async (req) => {
   const msg = update.message;
   if (msg && msg.text) {
     try {
+      // registra o chat (recebe avisos de boss por padrão)
+      const s = await loadChats();
+      if (touchChat(s, msg.chat.id)) await saveChats(s);
       await sendMessage(msg.chat.id, await buildReply(msg.text, msg.chat.id, store));
     } catch (e) { console.error("telegram webhook:", e.message); }
   }
