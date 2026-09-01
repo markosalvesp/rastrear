@@ -13,8 +13,13 @@ const store = {
   unfollow: (c, n) => updateChat(c, (chat) => unfollow(chat, n)),
   listWithModes: async (c) => {
     const id = String(c);
-    const s = { chats: { [id]: (await loadChat(id)) || { nicks: [] } } };
-    return listFor(s, id).map((n) => ({ nick: n, events: eventsFor(s, id, n) }));
+    const [chat, presenceState] = await Promise.all([loadChat(id), loadState()]);
+    const s = { chats: { [id]: chat || { nicks: [] } } };
+    return listFor(s, id).map((n) => ({
+      nick: n,
+      events: eventsFor(s, id, n),
+      onlineNow: getPresenceFrom(presenceState, n).onlineNow,
+    }));
   },
   setMode: (c, n, p) => updateChat(c, (chat) => setMode(chat, n, p)),
   toggleType: (c, n, t, on) => updateChat(c, (chat) => toggleType(chat, n, t, on)),
