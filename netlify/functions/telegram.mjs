@@ -2,6 +2,7 @@
 import { sendMessage } from "../../lib/telegram.js";
 import {
   loadChat, updateChat, follow, unfollow, listFor, setMode, toggleType, eventsFor, toggleBoss,
+  mutePvpAll, restorePvpAll,
 } from "../../lib/subs-store.js";
 import { loadState, getPresenceFrom } from "../../lib/presence-store.js";
 import { buildReply } from "../../lib/bot-commands.js";
@@ -17,6 +18,8 @@ const store = {
   },
   setMode: (c, n, p) => updateChat(c, (chat) => setMode(chat, n, p)),
   toggleType: (c, n, t, on) => updateChat(c, (chat) => toggleType(chat, n, t, on)),
+  mutePvpAll: (c) => updateChat(c, (chat) => mutePvpAll(chat)),
+  restorePvpAll: (c) => updateChat(c, (chat) => restorePvpAll(chat)),
   toggleBoss: (c) => updateChat(c, (chat) => toggleBoss(chat)),
   presence: async (n) => getPresenceFrom(await loadState(), n),
 };
